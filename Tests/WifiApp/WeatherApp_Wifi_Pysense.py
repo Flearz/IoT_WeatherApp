@@ -1,11 +1,11 @@
-from network import WLAN
 import socket
 import time
 import ubinascii
 import pycom
 from pycoproc_2 import Pycoproc
+from network import WLAN
 import machine
-from MQTTLib import AWSIoTMQTTClient
+from  AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 import json
 
 from LIS2HH12 import LIS2HH12
@@ -55,7 +55,7 @@ def printValues():
     lt = LTR329ALS01()
     print("Light (channel Blue lux, channel Red lux): " + str(lt.light()))
 
-printValues()
+# printValues()
 
 
 
@@ -74,28 +74,36 @@ DEVICENAME="CapteurRenens"
 
 wlan = WLAN(mode=WLAN.STA)
 
-
 # connection to wlan
 nets = wlan.scan()
+print(nets)
 for net in nets:
-#     if net.ssid == 'CollocHT':
-#         print('Network found!')
-#         wlan.connect(net.ssid, auth=(net.sec, 'henrithibaud'), timeout=5000)
-#         print("connecting",end='')
-#         while not wlan.isconnected():
-#             time.sleep(1)
-#             print(".",end='')
-#         print('WLAN connection succeeded!')
-#         break
- if net.ssid == 'P50HENRI':
-    print('Network found!')
-    wlan.connect(net.ssid, auth=(net.sec, 'jatonlmchm'), timeout=10000)
-    print("connecting",end='')
-    while not wlan.isconnected():
-        time.sleep(1)
-        print(".",end='')
-    print('WLAN connection succeeded!')
-    break
+    # if net.ssid == 'CollocHT':
+    #     print('Network found!')
+    #     wlan.connect(net.ssid, auth=(net.sec, 'henrithibaud'), timeout=5000)
+    #     print("connecting",end='')
+    #     while not wlan.isconnected():
+    #         time.sleep(1)
+    #         print(".",end='')
+    #     print('WLAN connection succeeded!')
+    #     break
+    if net.ssid == 'P50HENRI':
+        print('Network found!')
+        wlan.connect(net.ssid, auth=(net.sec, 'jatonlmchm'), timeout=10000)
+        print("connecting",end='')
+        while not wlan.isconnected():
+            time.sleep(1)
+            print(".",end='')
+        print('WLAN connection succeeded!')
+    # if net.ssid == 'FRANTZENT':
+    #     print('Network found!')
+    #     wlan.connect(net.ssid, auth=(net.sec, '-06F43y3'), timeout=10000)
+    #     print("connecting",end='')
+    #     while not wlan.isconnected():
+    #         time.sleep(1)
+    #         print(".",end='')
+    #     print('WLAN connection succeeded!')
+    # break
 #connected
 
 ####AWS 
@@ -108,7 +116,7 @@ def customCallback(client, userdata, message):
 	print("--------------\n\n")
 
 
-TOPIC= "/capteur"
+TOPIC= "capteurwifi"
 HOST="a2jrpgf4bh14vn-ats.iot.eu-west-1.amazonaws.com"
 PORT = 8883                                              # Port no.   
 clientId = "capteur_client"                                     # Thing_Name
@@ -156,9 +164,12 @@ while True:
     blue=str(lighttuple[0])
     red=str(lighttuple[1])
     #paylodmsg= '{"data": {"device name" : "{devicename}","temperature": "{temperature}","altitude": "{altitude}","pressure": "{pressure}","dew point": "{dew}","humidity": "{humidity}","light": {"red": "{red}","blue": "{blue}"/}/}/}'
-    paylodmsg= {"data": {"device name" : DEVICENAME,"temperature": str(temperatureMean),"relative humidity": siRelativeHumidity,"altitude": mpAltitude,"pressure": mppPressure,"dew point": siDewPoint,"ambient humidity": siAmbientHumidity,"light": {"blue":blue,"red": red}}}
+    paylodmsg= {"device_name" : DEVICENAME,"data": {"temperature": str(temperatureMean),"relative_humidity": siRelativeHumidity,"altitude": mpAltitude,"pressure": mppPressure,"dew_point": str(siDewPoint),"ambient_humidity": siAmbientHumidity,"light": {"blue":blue,"red": red}}}
     #paylodmsg.format(devicename = DEVICENAME, temperature= str(temperatureMean),altitude=str(mp.altitude()),pressure=str(mpp.pressure()), dew=str(si.dew_point()),humidity=str(si.humid_ambient(temperatureMean)),red=str(red),blue=str(blue))
     paylodmsg = json.dumps(paylodmsg) 
+    # payload={"payload":paylodmsg}
+    # paylodmsg = json.dumps(payload) 
+    print(paylodmsg)
     #paylodmsg_json = json.loads(paylodmsg)       
     pycomAwsMQTTClient.publish(TOPIC, paylodmsg, 1)
     time.sleep(10)

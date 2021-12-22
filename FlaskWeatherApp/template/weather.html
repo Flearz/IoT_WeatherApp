@@ -25,7 +25,7 @@
         <div class="container">
             <div class="columns">
                 <div class="column is-offset-4 is-4">
-                    {% for weather in weather_data %}
+                    {% for city in cities %}
                     <div class="box">
                         <article class="media">
                             <div class="media-left">
@@ -36,18 +36,20 @@
                             <div class="media-content">
                                 <div class="content">
                                     <p>
-                                        <span class="title">{{ weather.city }}</span>
+                                        <span class="title">{{ city.weather.city }}</span>
                                         <br>
-                                        <span class="subtitle">{{ weather.temperature }}° F</span>
-                                        <br> {{ weather.description }}
+                                        <span class="subtitle">{{ city.weather.temperature }}° F</span>
+                                        <br> {{ city.weather.description }}
                                     </p>
                                 </div>
                             </div>
                         </article>
+                      {% for fig in city.figs %}    <!-- OR FIG = CITY.FIGS[1] -->
                         <script type='text/javascript'>
-                            var graphs = {{matchGraphJSON | safe}};
+                            var graphs = {{fig | safe}};
                             Plotly.plot('chart',graphs,{});
                           </script>
+                        {% endfor %}
                     </div>
                     {% endfor %}
                 </div>

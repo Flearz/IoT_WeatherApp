@@ -14,8 +14,10 @@ app = Flask(__name__, static_url_path='',
 app.config['DEBUG'] = True
 
 
-class City():
-    name =""
+class City:
+    def __init__(self, name,weather,figs = []):
+        self.weather = weather
+        self.figs = figs
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -23,27 +25,43 @@ def index():
 
    # Get all different cities from json
     
-    cities= ["Renens", "La Chaux-de-Fonds"]
+    citiesNames= ["Renens", "La Chaux-de-Fonds"]
 
     url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
 
-    weather_data = []
+    cities =[]
+    for cityName in citiesNames:
+        figs=[]
+        #Evolution temperature
+        #figTemp = px.line(df, x=df.index, y=df.columns,title='Données du match')
+        #matchGraphJSONTemp = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        #figs.append(matchGraphJSONTemp)
+        #Evolution pression
+        #figTemp = px.line(df, x=df.index, y=df.columns,title='Données du match')
+        #matchGraphJSONTemp = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        #figs.append(matchGraphJSONTemp)
+        #....
 
-    for city in cities:
+
 
         r = requests.get(url.format(city)).json()
-
         weather = {
             'city' : city,
             'temperature' : r['main']['temp'],
             'description' : r['weather'][0]['description'],
             'icon' : r['weather'][0]['icon'],
         }
+        city = City(cityName,weather,figs) 
+        cities.append(city)
 
-        weather_data.append(weather)
+    #df = pd.read_json('data.json')
+	#df = read_data_csv("../../data/Passe_avant.csv")
+
+    #fig.update_xaxes( dtick="M1",tickformat="%b\n%Y")
+    return render_template('weather.html', cities=cities,)
 
 
-    return render_template('weather.html', weather_data=weather_data)
+
 
 
 ####AWS 
@@ -52,8 +70,8 @@ connflag = False
 
 def on_connect_sub(client, userdata, flags, rc):                # func for making connection
    print("Connection returned result: " + str(rc) )
-   client.subscribe("/appmobile", 1)
-   client.subscribe("appmobile", 1)
+   client.subscribe("/alarm", 1)
+   client.subscribe("alarm", 1)
 
  
 def on_message_sub(client, userdata, msg):                      # Func for Sending msg
