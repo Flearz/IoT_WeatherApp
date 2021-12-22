@@ -32,6 +32,7 @@ from MPL3115A2 import MPL3115A2,ALTITUDE,PRESSURE
 # pycom.heartbeat(False)
 # pycom.rgbled(0x0A0A08) # white
 
+
 def printValues():
     mp = MPL3115A2(mode=ALTITUDE) # Returns height in meters. Mode may also be set to PRESSURE, returning a value in Pascals
     print("MPL3115A2")
@@ -148,23 +149,23 @@ while True:
     mp = MPL3115A2(mode=ALTITUDE) # Returns height in meters. Mode may also be set to PRESSURE, returning a value in Pascals
 
     mpTemperature=mp.temperature()
-    mpAltitude=str(mp.altitude())
+    mpAltitude=mp.altitude()
 
     mpp = MPL3115A2(mode=PRESSURE) # Returns pressure in Pa. Mode may also be set to ALTITUDE, returning a value in meters
-    mppPressure=str(mpp.pressure())
+    mppPressure=mpp.pressure()
 
     si = SI7006A20()
     siTemperature=si.temperature()
-    siRelativeHumidity=str(si.humidity())
+    siRelativeHumidity=si.humidity()
     siDewPoint=si.dew_point()
     temperatureMean = (mpTemperature+ siTemperature)/2
-    siAmbientHumidity=str(si.humid_ambient(temperatureMean))
+    siAmbientHumidity=si.humid_ambient(temperatureMean)
     lt = LTR329ALS01()
     lighttuple=lt.light()
-    blue=str(lighttuple[0])
-    red=str(lighttuple[1])
+    blue=lighttuple[0]
+    red=lighttuple[1]
     #paylodmsg= '{"data": {"device name" : "{devicename}","temperature": "{temperature}","altitude": "{altitude}","pressure": "{pressure}","dew point": "{dew}","humidity": "{humidity}","light": {"red": "{red}","blue": "{blue}"/}/}/}'
-    paylodmsg= {"device_name" : DEVICENAME,"data": {"temperature": str(temperatureMean),"relative_humidity": siRelativeHumidity,"altitude": mpAltitude,"pressure": mppPressure,"dew_point": str(siDewPoint),"ambient_humidity": siAmbientHumidity,"light": {"blue":blue,"red": red}}}
+    paylodmsg= {"device_id" : DEVICENAME,"decoded_payload": {"temperature_1": temperatureMean,"relative_humidity_1": siRelativeHumidity,"gps_1": {"altitude": mpAltitude,"latitude":46,"longitude":6},"barometric_pressure_1": mppPressure/100,"temperature_2": siDewPoint,"relative_humidity_2": siAmbientHumidity,"luminosity_1":blue,"luminosity_2": red}}
     #paylodmsg.format(devicename = DEVICENAME, temperature= str(temperatureMean),altitude=str(mp.altitude()),pressure=str(mpp.pressure()), dew=str(si.dew_point()),humidity=str(si.humid_ambient(temperatureMean)),red=str(red),blue=str(blue))
     paylodmsg = json.dumps(paylodmsg) 
     # payload={"payload":paylodmsg}
